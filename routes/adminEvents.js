@@ -5,6 +5,7 @@ const User = require("../models/Users");
 const router = express.Router();
 const mongoose = require("mongoose");
 const Event = require("../models/Events");
+const { sendEventNotification } = require("../utils/sendMail");
 
 
 router.post("/", async (req, res) => {

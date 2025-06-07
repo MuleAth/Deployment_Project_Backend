@@ -88,6 +88,16 @@ router.get("/user/:userId", async (req, res) => {
       console.log(`Python process exited with code ${code}`);
 
       if (code !== 0) {
+        // Check if the error is due to missing dependencies
+        if (errorString.includes("ModuleNotFoundError") || errorString.includes("No module named")) {
+          console.log("Python dependencies missing, returning fallback recommendations");
+          return res.status(200).json({
+            success: true,
+            recommendations: [],
+            warning: "ML recommendation system is currently unavailable due to missing dependencies. Please install Python dependencies."
+          });
+        }
+        
         return res.status(500).json({
           success: false,
           message: "Failed to generate recommendations",
@@ -217,6 +227,16 @@ router.get("/all-users", async (req, res) => {
       console.log(`Python process for all users exited with code ${code}`);
 
       if (code !== 0) {
+        // Check if the error is due to missing dependencies
+        if (errorString.includes("ModuleNotFoundError") || errorString.includes("No module named")) {
+          console.log("Python dependencies missing for all users, returning fallback recommendations");
+          return res.status(200).json({
+            success: true,
+            recommendations: [],
+            warning: "ML recommendation system is currently unavailable due to missing dependencies. Please install Python dependencies."
+          });
+        }
+        
         return res.status(500).json({
           success: false,
           message: "Failed to generate recommendations for all users",
