@@ -204,7 +204,7 @@ const sendWelcomeEmail = async (userEmail, userName) => {
                                     <p>Thank you for joining our sports community. Sportalon connects athletes, teams, and sports enthusiasts from around the world.</p>
                                     <p>Your account is now active and ready to use. Start exploring events, join competitions, or connect with other sports lovers!</p>
                                     
-                                    <center><a href="https://sportalon-frontend.vercel.app" class="action-button">GET STARTED</a></center>
+                                    <center><a href="https://sportalon-front.vercel.app" class="action-button">GET STARTED</a></center>
                                 </div>
                             </div>
                             
@@ -513,7 +513,7 @@ const sendEventNotification = async (userEmail, userName, eventDetails) => {
                                         <p><strong>Apply by:</strong> ${applyLastDate}</p>
                                     </div>
                                     
-                                    <center><a href="https://sportalon-frontend.vercel.app/events/${eventId}?register=true" class="action-button">Register Now</a></center>
+                                    <center><a href="https://sportalon-front.vercel.app/events/${eventId}?register=true" class="action-button">Register Now</a></center>
                                 </div>
                             </div>
                             
@@ -646,7 +646,7 @@ const sendOTPEmail = async (userEmail, otp) => {
               <p>If you didn't request this OTP, please ignore this email.</p>
               
               <div style="text-align: center; margin: 25px 0;">
-                <a href="https://sportalon-frontend.vercel.app/signup" style="display: inline-block; background: linear-gradient(to right, #8e24aa, #9c27b0); color: white; text-decoration: none; padding: 12px 30px; border-radius: 50px; font-weight: bold; box-shadow: 0 4px 10px rgba(142, 36, 170, 0.4);">REGISTER NOW</a>
+                <a href="https://sportalon-front.vercel.app/signup" style="display: inline-block; background: linear-gradient(to right, #8e24aa, #9c27b0); color: white; text-decoration: none; padding: 12px 30px; border-radius: 50px; font-weight: bold; box-shadow: 0 4px 10px rgba(142, 36, 170, 0.4);">REGISTER NOW</a>
               </div>
               
               <p>Best regards,<br>
