@@ -3,12 +3,27 @@ const nodemailer = require("nodemailer");
 
 // Create reusable transporter
 const createTransporter = () => {
+  // Get email credentials from environment variables if available, otherwise use defaults
+  const emailUser = process.env.EMAIL_USER || "sportalonn@gmail.com";
+  const emailPass = process.env.EMAIL_PASS || "osop wyts wfzg nmdn";
+  
+  // Log which email is being used (without showing the password)
+  console.log(`Creating email transporter with account: ${emailUser}`);
+  
   return nodemailer.createTransport({
     service: "gmail",
     auth: {
-      user: "sportalonn@gmail.com", // Using the provided email
-      pass: "osop wyts wfzg nmdn"   // Using the provided app password
+      user: emailUser,
+      pass: emailPass
     },
+    // Add additional options for better reliability
+    tls: {
+      rejectUnauthorized: false // Helps with some certificate issues
+    },
+    // Increase timeouts for slower connections
+    connectionTimeout: 10000, // 10 seconds
+    greetingTimeout: 10000,
+    socketTimeout: 15000
   });
 };
 
@@ -542,37 +557,127 @@ const sendEventNotification = async (userEmail, userName, eventDetails) => {
   }
 };
 
-// Send OTP Email
+// Send OTP Email with retry logic
 const sendOTPEmail = async (userEmail, otp) => {
-  try {
-    const transporter = createTransporter();
-
-    const mailOptions = {
-      from: '"Sportalon" <sportalonn@gmail.com>',
-      to: userEmail,
-      subject: "Your OTP for Sportalon Registration 🔐",
-      html: `
-        <h2>Email Verification</h2>
-        <p>Thank you for signing up with Sportalon!</p>
-        <p>Your One-Time Password (OTP) for account verification is:</p>
-        <h1 style="font-size: 36px; letter-spacing: 5px; text-align: center; color: #4F46E5; padding: 20px; margin: 20px 0; background-color: #EEF2FF; border-radius: 8px;">
-          ${otp}
-        </h1>
-        <p>This OTP is valid for 10 minutes. Please enter this code to complete your registration.</p>
-        <p>If you didn't request this OTP, please ignore this email.</p>
-        <br/>
-        <p>Best regards,</p>
-        <p><strong>The Sportalon Team</strong></p>
-      `,
-    };
-
-    await transporter.sendMail(mailOptions);
-    console.log(`OTP email sent successfully to ${userEmail}!`);
-    return true;
-  } catch (error) {
-    console.error("Error sending OTP email:", error);
+  // Validate email format
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(userEmail)) {
+    console.error(`Invalid email format: ${userEmail}`);
     return false;
   }
+
+  // Maximum number of retry attempts
+  const MAX_RETRIES = 3;
+  let retryCount = 0;
+  let lastError = null;
+
+  while (retryCount < MAX_RETRIES) {
+    try {
+      console.log(`Attempt ${retryCount + 1} to send OTP email to ${userEmail}`);
+      
+      const transporter = createTransporter();
+
+      const mailOptions = {
+        from: '"Sportalon" <sportalonn@gmail.com>',
+        to: userEmail,
+        subject: "Your OTP for Sportalon Registration 🔐",
+        html: `
+          <!DOCTYPE html>
+          <html>
+          <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>Email Verification</title>
+            <style>
+              body {
+                font-family: Arial, sans-serif;
+                line-height: 1.6;
+                color: #333;
+                max-width: 600px;
+                margin: 0 auto;
+                padding: 20px;
+              }
+              .container {
+                border: 1px solid #e1e1e1;
+                border-radius: 10px;
+                padding: 20px;
+                box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+              }
+              .header {
+                text-align: center;
+                padding-bottom: 15px;
+                border-bottom: 1px solid #eee;
+                margin-bottom: 20px;
+              }
+              .otp-container {
+                font-size: 36px;
+                letter-spacing: 5px;
+                text-align: center;
+                color: #4F46E5;
+                padding: 20px;
+                margin: 20px 0;
+                background-color: #EEF2FF;
+                border-radius: 8px;
+                font-weight: bold;
+              }
+              .footer {
+                margin-top: 30px;
+                text-align: center;
+                font-size: 12px;
+                color: #666;
+              }
+            </style>
+          </head>
+          <body>
+            <div class="container">
+              <div class="header">
+                <h2>Email Verification</h2>
+              </div>
+              
+              <p>Thank you for signing up with Sportalon!</p>
+              <p>Your One-Time Password (OTP) for account verification is:</p>
+              
+              <div class="otp-container">
+                ${otp}
+              </div>
+              
+              <p>This OTP is valid for 10 minutes. Please enter this code to complete your registration.</p>
+              <p>If you didn't request this OTP, please ignore this email.</p>
+              
+              <p>Best regards,<br>
+              <strong>The Sportalon Team</strong></p>
+              
+              <div class="footer">
+                &copy; 2023 Sportalon. All rights reserved.
+              </div>
+            </div>
+          </body>
+          </html>
+        `,
+        // Add text alternative for email clients that don't support HTML
+        text: `Your OTP for Sportalon Registration: ${otp}\n\nThis OTP is valid for 10 minutes. Please enter this code to complete your registration.\n\nBest regards,\nThe Sportalon Team`
+      };
+
+      const info = await transporter.sendMail(mailOptions);
+      console.log(`OTP email sent successfully to ${userEmail}! Message ID: ${info.messageId}`);
+      return true;
+    } catch (error) {
+      lastError = error;
+      console.error(`Attempt ${retryCount + 1} failed:`, error.message);
+      retryCount++;
+      
+      if (retryCount < MAX_RETRIES) {
+        // Wait before retrying (exponential backoff)
+        const waitTime = 1000 * Math.pow(2, retryCount); // 2, 4, 8 seconds
+        console.log(`Waiting ${waitTime/1000} seconds before retry...`);
+        await new Promise(resolve => setTimeout(resolve, waitTime));
+      }
+    }
+  }
+
+  // All retries failed
+  console.error(`Failed to send OTP email to ${userEmail} after ${MAX_RETRIES} attempts. Last error:`, lastError);
+  return false;
 };
 
 

@@ -5,8 +5,33 @@ const User = require("../models/Users");
 const { sendWelcomeEmail, sendOTPEmail } = require("../utils/sendMail");
 const router = express.Router();
 
-// Store OTPs temporarily (in production, use Redis or other store)
-const otpStore = {};
+// Create a schema for OTP storage
+const mongoose = require("mongoose");
+const otpSchema = new mongoose.Schema({
+  email: {
+    type: String,
+    required: true,
+    unique: true,
+    lowercase: true,
+    trim: true,
+  },
+  otp: {
+    type: String,
+    required: true,
+  },
+  createdAt: {
+    type: Date,
+    default: Date.now,
+    expires: 600, // Auto-delete after 10 minutes (600 seconds)
+  },
+  expiresAt: {
+    type: Date,
+    required: true,
+  }
+});
+
+// Create OTP model if it doesn't exist
+const OTP = mongoose.models.OTP || mongoose.model("OTP", otpSchema);
 
 // Generate and send OTP for email verification
 router.post("/generate-otp", async (req, res) => {
@@ -26,15 +51,28 @@ router.post("/generate-otp", async (req, res) => {
     // Generate a 6-digit OTP
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
     
-    // Store OTP with expiration (10 minutes)
-    otpStore[email] = {
-      otp,
-      createdAt: new Date(),
-      expiresAt: new Date(Date.now() + 10 * 60 * 1000), // 10 minutes expiration
-    };
+    // Calculate expiration time (10 minutes from now)
+    const expiresAt = new Date(Date.now() + 10 * 60 * 1000);
+    
+    // Store OTP in database (upsert - update if exists, insert if not)
+    await OTP.findOneAndUpdate(
+      { email },
+      { 
+        email,
+        otp,
+        expiresAt
+      },
+      { upsert: true, new: true }
+    );
 
     // Send OTP to user's email
-    await sendOTPEmail(email, otp);
+    const emailSent = await sendOTPEmail(email, otp);
+    
+    if (!emailSent) {
+      return res.status(500).json({
+        message: "Failed to send OTP email. Please try again.",
+      });
+    }
 
     return res.status(200).json({
       success: true,
@@ -58,25 +96,28 @@ router.post("/verify-otp", async (req, res) => {
       return res.status(400).json({ message: "Email and OTP are required" });
     }
 
-    // Check if OTP exists and is valid
-    const otpData = otpStore[email];
-    if (!otpData) {
+    // Find OTP record in database
+    const otpRecord = await OTP.findOne({ email });
+    
+    // Check if OTP exists
+    if (!otpRecord) {
       return res.status(400).json({ message: "OTP not found or expired, please request a new one" });
     }
 
     // Check if OTP is expired
-    if (new Date() > otpData.expiresAt) {
-      delete otpStore[email]; // Clean up expired OTP
+    if (new Date() > otpRecord.expiresAt) {
+      // Delete expired OTP
+      await OTP.deleteOne({ email });
       return res.status(400).json({ message: "OTP expired, please request a new one" });
     }
 
     // Verify OTP
-    if (otpData.otp !== otp) {
+    if (otpRecord.otp !== otp) {
       return res.status(400).json({ message: "Invalid OTP" });
     }
 
-    // OTP is verified, clear it from the store
-    delete otpStore[email];
+    // OTP is verified, delete it from database
+    await OTP.deleteOne({ email });
 
     return res.status(200).json({
       success: true,
