@@ -37,7 +37,9 @@ app.use(cookieParser());
 app.use(cors({
   origin: [
     "http://localhost:5173", 
-    "https://your-frontend-domain.vercel.app" // We'll update this after deploying frontend
+    "https://sportalon-front-atharvs-projects-c46e87c9.vercel.app", // Your actual Vercel frontend
+    "https://deployment-frontend-xi.vercel.app", // Backup frontend
+    /\.vercel\.app$/ // Allow all Vercel domains for flexibility
   ], 
   credentials: true, 
 }));
