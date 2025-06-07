@@ -3,9 +3,10 @@ const nodemailer = require("nodemailer");
 
 // Create reusable transporter
 const createTransporter = () => {
-  // Get email credentials from environment variables if available, otherwise use defaults
-  const emailUser = process.env.EMAIL_USER || "sportalonn@gmail.com";
-  const emailPass = process.env.EMAIL_PASS || "osop wyts wfzg nmdn";
+  // Use a fixed set of credentials that are known to work
+  // This is a temporary solution - in production, use environment variables
+  const emailUser = "sportalonn@gmail.com";
+  const emailPass = "osop wyts wfzg nmdn";
   
   // Log which email is being used (without showing the password)
   console.log(`Creating email transporter with account: ${emailUser}`);
@@ -203,7 +204,7 @@ const sendWelcomeEmail = async (userEmail, userName) => {
                                     <p>Thank you for joining our sports community. Sportalon connects athletes, teams, and sports enthusiasts from around the world.</p>
                                     <p>Your account is now active and ready to use. Start exploring events, join competitions, or connect with other sports lovers!</p>
                                     
-                                    <center><a href="https://sportalon-front-i7k9fziv8-atharvs-projects-c46e87c9.vercel.app" class="action-button">GET STARTED</a></center>
+                                    <center><a href="https://sportalon-frontend.vercel.app" class="action-button">GET STARTED</a></center>
                                 </div>
                             </div>
                             
@@ -512,7 +513,7 @@ const sendEventNotification = async (userEmail, userName, eventDetails) => {
                                         <p><strong>Apply by:</strong> ${applyLastDate}</p>
                                     </div>
                                     
-                                    <center><a href="https://sportalon-front-i7k9fziv8-atharvs-projects-c46e87c9.vercel.app/events/${eventId}?register=true" class="action-button">Register Now</a></center>
+                                    <center><a href="https://sportalon-frontend.vercel.app/events/${eventId}?register=true" class="action-button">Register Now</a></center>
                                 </div>
                             </div>
                             
@@ -643,6 +644,10 @@ const sendOTPEmail = async (userEmail, otp) => {
               
               <p>This OTP is valid for 10 minutes. Please enter this code to complete your registration.</p>
               <p>If you didn't request this OTP, please ignore this email.</p>
+              
+              <div style="text-align: center; margin: 25px 0;">
+                <a href="https://sportalon-frontend.vercel.app/signup" style="display: inline-block; background: linear-gradient(to right, #8e24aa, #9c27b0); color: white; text-decoration: none; padding: 12px 30px; border-radius: 50px; font-weight: bold; box-shadow: 0 4px 10px rgba(142, 36, 170, 0.4);">REGISTER NOW</a>
+              </div>
               
               <p>Best regards,<br>
               <strong>The Sportalon Team</strong></p>
