@@ -1,0 +1,2 @@
+// This file has been removed as part of notification system cleanup
+// Original Notification.js model has been disabled
