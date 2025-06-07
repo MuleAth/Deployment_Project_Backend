@@ -542,7 +542,42 @@ const sendEventNotification = async (userEmail, userName, eventDetails) => {
   }
 };
 
+// Send OTP Email
+const sendOTPEmail = async (userEmail, otp) => {
+  try {
+    const transporter = createTransporter();
+
+    const mailOptions = {
+      from: '"Sportalon" <sportalonn@gmail.com>',
+      to: userEmail,
+      subject: "Your OTP for Sportalon Registration 🔐",
+      html: `
+        <h2>Email Verification</h2>
+        <p>Thank you for signing up with Sportalon!</p>
+        <p>Your One-Time Password (OTP) for account verification is:</p>
+        <h1 style="font-size: 36px; letter-spacing: 5px; text-align: center; color: #4F46E5; padding: 20px; margin: 20px 0; background-color: #EEF2FF; border-radius: 8px;">
+          ${otp}
+        </h1>
+        <p>This OTP is valid for 10 minutes. Please enter this code to complete your registration.</p>
+        <p>If you didn't request this OTP, please ignore this email.</p>
+        <br/>
+        <p>Best regards,</p>
+        <p><strong>The Sportalon Team</strong></p>
+      `,
+    };
+
+    await transporter.sendMail(mailOptions);
+    console.log(`OTP email sent successfully to ${userEmail}!`);
+    return true;
+  } catch (error) {
+    console.error("Error sending OTP email:", error);
+    return false;
+  }
+};
+
+
 module.exports = {
   sendWelcomeEmail,
-  sendEventNotification
+  sendEventNotification,
+  sendOTPEmail
 };
