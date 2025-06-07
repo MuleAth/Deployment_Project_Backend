@@ -160,28 +160,7 @@ const sendWelcomeEmail = async (userEmail, userName) => {
                     box-shadow: 0 6px 15px rgba(142, 36, 170, 0.5);
                 }
                 
-                .motion-element {
-                    position: absolute;
-                    background: linear-gradient(45deg, rgba(142, 36, 170, 0.7), rgba(106, 27, 154, 0.7));
-                    border-radius: 50%;
-                    filter: blur(30px);
-                    z-index: 0;
-                    opacity: 0.4;
-                }
-                
-                .motion-1 {
-                    width: 150px;
-                    height: 150px;
-                    top: -50px;
-                    right: -50px;
-                }
-                
-                .motion-2 {
-                    width: 100px;
-                    height: 100px;
-                    bottom: 20px;
-                    left: -30px;
-                }
+
                 
                 @media (max-width: 600px) {
                     .email-container {
@@ -203,8 +182,6 @@ const sendWelcomeEmail = async (userEmail, userName) => {
                             
                             <div class="body-content">
                                 <div class="sports-icons"></div>
-                                <div class="motion-element motion-1"></div>
-                                <div class="motion-element motion-2"></div>
                                 
                                 <div class="message-box">
                                     <h2 style="color: #6a1b9a; margin-top: 0;">Welcome to Sportalon, ${userName}!</h2>
@@ -458,29 +435,7 @@ const sendEventNotification = async (userEmail, userName, eventDetails) => {
                     box-shadow: 0 6px 15px rgba(142, 36, 170, 0.5);
                 }
                 
-                /* Dynamic motion elements */
-                .motion-element {
-                    position: absolute;
-                    background: linear-gradient(45deg, rgba(142, 36, 170, 0.7), rgba(106, 27, 154, 0.7));
-                    border-radius: 50%;
-                    filter: blur(30px);
-                    z-index: 0;
-                    opacity: 0.4;
-                }
-                
-                .motion-1 {
-                    width: 150px;
-                    height: 150px;
-                    top: -50px;
-                    right: -50px;
-                }
-                
-                .motion-2 {
-                    width: 100px;
-                    height: 100px;
-                    bottom: 20px;
-                    left: -30px;
-                }
+
                 
                 @media (max-width: 600px) {
                     .email-container {
@@ -528,8 +483,6 @@ const sendEventNotification = async (userEmail, userName, eventDetails) => {
                             <!-- Main Content Area -->
                             <div class="body-content">
                                 <div class="sports-icons"></div>
-                                <div class="motion-element motion-1"></div>
-                                <div class="motion-element motion-2"></div>
                                 
                                 <div class="message-box">
                                     <h2 style="color: #6a1b9a; margin-top: 0;">New Event Alert</h2>
