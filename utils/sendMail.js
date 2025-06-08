@@ -24,7 +24,13 @@ const createTransporter = () => {
     // Increase timeouts for slower connections
     connectionTimeout: 10000, // 10 seconds
     greetingTimeout: 10000,
-    socketTimeout: 15000
+    socketTimeout: 15000,
+    // DKIM would improve deliverability but requires proper setup
+    
+    // Set secure flag
+    secure: true,
+    // Set pool to true for connection reuse
+    pool: true
   });
 };
 
@@ -579,9 +585,15 @@ const sendOTPEmail = async (userEmail, otp) => {
       const transporter = createTransporter();
 
       const mailOptions = {
-        from: '"Sportalon" <sportalonn@gmail.com>',
+        from: '"Sportalon Sports" <sportalonn@gmail.com>',
         to: userEmail,
-        subject: "Your OTP for Sportalon Registration 🔐",
+        subject: "Your Verification Code for Sportalon Registration",
+        priority: "high",
+        headers: {
+          "X-Priority": "1",
+          "X-MSMail-Priority": "High",
+          "Importance": "high"
+        },
         html: `
           <!DOCTYPE html>
           <html>
@@ -635,18 +647,18 @@ const sendOTPEmail = async (userEmail, otp) => {
                 <h2>Email Verification</h2>
               </div>
               
-              <p>Thank you for signing up with Sportalon!</p>
-              <p>Your One-Time Password (OTP) for account verification is:</p>
+              <p>Hello from Sportalon Sports,</p>
+              <p>Thank you for creating an account with us. To verify your email address, please use the verification code below:</p>
               
               <div class="otp-container">
                 ${otp}
               </div>
               
-              <p>This OTP is valid for 10 minutes. Please enter this code to complete your registration.</p>
-              <p>If you didn't request this OTP, please ignore this email.</p>
+              <p>This verification code will expire in 10 minutes.</p>
+              <p>If you did not request this code, you can safely ignore this email.</p>
               
               <div style="text-align: center; margin: 25px 0;">
-                <a href="https://sportalon-front.vercel.app/signup" style="display: inline-block; background: linear-gradient(to right, #8e24aa, #9c27b0); color: white; text-decoration: none; padding: 12px 30px; border-radius: 50px; font-weight: bold; box-shadow: 0 4px 10px rgba(142, 36, 170, 0.4);">REGISTER NOW</a>
+                <a href="https://sportalon-front.vercel.app/signup" style="display: inline-block; background-color: #6a1b9a; color: white; text-decoration: none; padding: 12px 30px; border-radius: 4px; font-weight: bold;">Complete Registration</a>
               </div>
               
               <p>Best regards,<br>
@@ -660,7 +672,7 @@ const sendOTPEmail = async (userEmail, otp) => {
           </html>
         `,
         // Add text alternative for email clients that don't support HTML
-        text: `Your OTP for Sportalon Registration: ${otp}\n\nThis OTP is valid for 10 minutes. Please enter this code to complete your registration.\n\nBest regards,\nThe Sportalon Team`
+        text: `Hello from Sportalon Sports,\n\nThank you for creating an account with us. To verify your email address, please use this verification code: ${otp}\n\nThis verification code will expire in 10 minutes.\n\nIf you did not request this code, you can safely ignore this email.\n\nTo complete registration, visit: https://sportalon-front.vercel.app/signup\n\nBest regards,\nThe Sportalon Team`
       };
 
       const info = await transporter.sendMail(mailOptions);
